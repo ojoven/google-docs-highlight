@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+    <script src="Code.gs"></script>
+    
+    <style>
+    .sidebar-body {
+    margin: 10px;
+    }
+    
+    .button {
+    margin: 10px 0;
+    }
+    
+    #stats {
+    display: none;
+    }
+    
+    .stat-container {
+    margin: 10px 0;
+    }
+    
+    .colored-square {
+    width: 16px;
+    height: 16px;
+    float: left;
+    background: #fff2cc;
+    margin-right: 5px;
+    }
+    
+    .stat-container var {
+    font-weight: bold;
+    }
+    
+    </style>
+  </head>
+  <body>
+    <div class="sidebar-body">
+    Just click on the following button to get the text highlighted per sentence length.<br>
+    <span id="to-highlight" class="button blue">Highlight!</span>
+    
+    <div id="stats">
+    <h2 class="title">STATS</h2>
+    
+    <!-- YELLOW -->
+    <div class="stat-container yellow">
+      <div class="colored-square"></div>
+      <div class="stat-text"><var class="num"></var> tiny sentences (<var class="percentage"></var>%)</div>
+    </div>
+    
+    <!-- PINK -->
+    <div class="stat-container pink">
+      <div class="colored-square"></div>
+      <div class="stat-text"><var class="num"></var> short sentences (<var class="percentage"></var>%)</div>
+    </div>
+    
+    <!-- RED -->
+    <div class="stat-container red">
+      <div class="colored-square"></div>
+      <div class="stat-text"><var class="num"></var> 5-word sentences (<var class="percentage"></var>%)</div>
+    </div>    
+    
+    <!-- GREEN -->
+    <div class="stat-container green">
+      <div class="colored-square"></div>
+      <div class="stat-text"><var class="num"></var> medium sentences (<var class="percentage"></var>%)</div>
+    </div>       
+    
+    <!-- CYAN -->
+    <div class="stat-container cyan">
+      <div class="colored-square"></div>
+      <div class="stat-text"><var class="num"></var> long sentences (<var class="percentage"></var>%)</div>
+    </div>        
+    
+    </div>
+    </div>
+    
+    <script>
+    /**
+    * On document load, assign click handler to buttons
+    */
+    $(function() {
+    $('#to-highlight').click(function() {
+    
+        // Show stats
+    $('#stats').show();
+
+    stats = runDocumentTextHighlighter();
+    
+    // Add number to stats
+    stats.forEach(function(num, color) {
+    
+    $('.' + color).find('.num').html(num);
+    
+    });
+    
+    });
+    });
+
+    </script>
+  </body>
+</html>
