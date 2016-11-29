@@ -1,4 +1,4 @@
-GOOGLE DOCS HIGHLIGHT
+GOOGLE DOCS HIGHLIGHT THE MUSIC
 ==============================
 
 Check the "music" of your writings on Google Docs by automatically highlighting the sentences based on their length.
