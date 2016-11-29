@@ -1,7 +1,7 @@
 GOOGLE DOCS HIGHLIGHT
 ==============================
 
-Check the "music" of your writings on Google Docs by highlighting the sentences.
+Check the "music" of your writings on Google Docs by automatically highlighting the sentences based on their length.
 
 Based on the quote from Gary Provost:
 
