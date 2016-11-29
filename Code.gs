@@ -20,7 +20,7 @@ function showSidebar() {
 function runDocumentTextHighlighter() {
   var body = DocumentApp.getActiveDocument().getBody();
   var paragraphs = body.getParagraphs();
-  var stats = [];
+  var stats = {};
   
   paragraphs.forEach(function(paragraph) {
     
@@ -34,27 +34,28 @@ function runDocumentTextHighlighter() {
       
       var color = '#fff';
       
-      // Get the sentence's length
-      var sentenceLength = sentence.trim().split(' ').length;
-      if (sentenceLength <= 2) {
-        color = '#fff2cc'; // yellow
-        stats = increaseNumStats(stats, 'yellow');
-      } else if (sentenceLength <= 4) {
-        color = '#ffbff5'; // pink
-        stats = increaseNumStats(stats, 'pink');
-      } else if (sentenceLength <= 6) {
-        color = '#ff8f8f'; // red
-        stats = increaseNumStats(stats, 'red');
-      } else if (sentenceLength <= 10) {
-        color = '#aeffa8'; // green
-        stats = increaseNumStats(stats, 'green');
-      } else {
-        color = '#8ff4ff'; // cyan
-        stats = increaseNumStats(stats, 'cyan');
-      }
-      
       // If not empty sentence
       if (sentence.trim()!="") {
+      
+        // Get the sentence's length
+        var sentenceLength = sentence.trim().split(' ').length;
+        if (sentenceLength <= 2) {
+          color = '#fff2cc'; // yellow
+          stats = increaseNumStats(stats, 'yellow');
+        } else if (sentenceLength <= 4) {
+          color = '#ffbff5'; // pink
+          stats = increaseNumStats(stats, 'pink');
+        } else if (sentenceLength <= 6) {
+          color = '#ff8f8f'; // red
+          stats = increaseNumStats(stats, 'red');
+        } else if (sentenceLength <= 10) {
+          color = '#aeffa8'; // green
+          stats = increaseNumStats(stats, 'green');
+        } else {
+          color = '#8ff4ff'; // cyan
+          stats = increaseNumStats(stats, 'cyan');
+        }
+      
         highlightText(paragraph, sentence, color);
       }
       
@@ -62,7 +63,35 @@ function runDocumentTextHighlighter() {
     
   });
   
-  return stats;
+  var statsString = JSON.stringify(stats);
+  return statsString;
+  
+}
+
+function runDocumentTextHighlightCleaner() {
+  var body = DocumentApp.getActiveDocument().getBody();
+  var paragraphs = body.getParagraphs();
+  
+  paragraphs.forEach(function(paragraph) {
+    
+    // Vars
+    var pText = paragraph.editAsText();
+    var pString = pText.getText();
+    var sentencesArray = pString.split('.');
+    
+    // Loop over the sentences
+    sentencesArray.forEach(function(sentence) {
+      
+      var color = '#fff';
+      
+      // If not empty sentence
+      if (sentence.trim()!="") {
+        highlightText(paragraph, sentence, null);
+      }
+      
+    });
+    
+  });
   
 }
 
@@ -72,6 +101,8 @@ function increaseNumStats(stats, color) {
   } else {
     stats[color]++; 
   }
+  
+  Logger.log(stats[color]);
   
   return stats;
 }

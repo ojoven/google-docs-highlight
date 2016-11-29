@@ -1,105 +1,202 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <base target="_top">
-    <link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
-    <script src="Code.gs"></script>
-    
-    <style>
-    .sidebar-body {
-    margin: 10px;
-    }
-    
-    .button {
-    margin: 10px 0;
-    }
-    
-    #stats {
-    display: none;
-    }
-    
-    .stat-container {
-    margin: 10px 0;
-    }
-    
-    .colored-square {
-    width: 16px;
-    height: 16px;
-    float: left;
-    background: #fff2cc;
-    margin-right: 5px;
-    }
-    
-    .stat-container var {
-    font-weight: bold;
-    }
-    
-    </style>
-  </head>
-  <body>
-    <div class="sidebar-body">
-    Just click on the following button to get the text highlighted per sentence length.<br>
-    <span id="to-highlight" class="button blue">Highlight!</span>
-    
-    <div id="stats">
-    <h2 class="title">STATS</h2>
-    
-    <!-- YELLOW -->
-    <div class="stat-container yellow">
-      <div class="colored-square"></div>
-      <div class="stat-text"><var class="num"></var> tiny sentences (<var class="percentage"></var>%)</div>
-    </div>
-    
-    <!-- PINK -->
-    <div class="stat-container pink">
-      <div class="colored-square"></div>
-      <div class="stat-text"><var class="num"></var> short sentences (<var class="percentage"></var>%)</div>
-    </div>
-    
-    <!-- RED -->
-    <div class="stat-container red">
-      <div class="colored-square"></div>
-      <div class="stat-text"><var class="num"></var> 5-word sentences (<var class="percentage"></var>%)</div>
-    </div>    
-    
-    <!-- GREEN -->
-    <div class="stat-container green">
-      <div class="colored-square"></div>
-      <div class="stat-text"><var class="num"></var> medium sentences (<var class="percentage"></var>%)</div>
-    </div>       
-    
-    <!-- CYAN -->
-    <div class="stat-container cyan">
-      <div class="colored-square"></div>
-      <div class="stat-text"><var class="num"></var> long sentences (<var class="percentage"></var>%)</div>
-    </div>        
-    
-    </div>
-    </div>
-    
-    <script>
-    /**
-    * On document load, assign click handler to buttons
-    */
-    $(function() {
-    $('#to-highlight').click(function() {
-    
-        // Show stats
-    $('#stats').show();
+<head>
+	<base target="_top">
+	<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css">
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js"></script>
+	<script src="Code.gs"></script>
 
-    stats = runDocumentTextHighlighter();
-    
-    // Add number to stats
-    stats.forEach(function(num, color) {
-    
-    $('.' + color).find('.num').html(num);
-    
-    });
-    
-    });
-    });
+	<style>
+		/** BODY **/
+		.sidebar-body {
+			margin: 10px;
+		}
 
-    </script>
-  </body>
+		/** BUTTON **/
+		.button {
+			margin: 10px 0;
+		}
+
+		/** STATS **/
+		#stats {
+			display: none;
+		}
+
+		.stat-container {
+			margin: 10px 0;
+		}
+
+		/** NUMS **/
+		.stat-container var {
+			font-weight: bold;
+		}
+
+		/** SQUARES **/
+		.colored-square {
+			width: 16px;
+			height: 16px;
+			float: left;
+			background: #fff2cc;
+			margin-right: 5px;
+		}
+
+		/** colors **/
+		.stat-container.yellow .colored-square { background: #fff2cc; }
+		.stat-container.pink .colored-square { background: #ffbff5; }
+		.stat-container.red .colored-square { background: #ff8f8f; }
+		.stat-container.green .colored-square { background: #aeffa8; }
+		.stat-container.cyan .colored-square { background: #8ff4ff; }
+
+		/** MESSAGES **/
+		.informative, .ego {
+			color: #999;
+			font-size: 12px;
+			margin: 10px 0;
+		}
+
+		.ego {
+			font-size: 10px;
+			line-height: 1;
+		}
+
+		.ego a {
+			color: #999;
+			font-weight: bold;
+		}
+
+		/** GIF LOADER **/
+		.loader {
+			margin: 20px auto;
+			width: 32px;
+			height: 32px;
+			background-repeat: no-repeat;
+			background-image: url(data:image/gif;base64,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IGVzdGFibGlzaGVkIGluIDxiPi9ob21lL2FqYXhsb2FkL3d3dy9saWJyYWlyaWVzL2NsYXNzLm15c3FsLnBocDwvYj4gb24gbGluZSA8Yj42ODwvYj48YnIgLz4KPGJyIC8+CjxiPldhcm5pbmc8L2I+OiAgbXlzcWxfcXVlcnkoKSBbPGEgaHJlZj0nZnVuY3Rpb24ubXlzcWwtcXVlcnknPmZ1bmN0aW9uLm15c3FsLXF1ZXJ5PC9hPl06IENhbid0IGNvbm5lY3QgdG8gbG9jYWwgTXlTUUwgc2VydmVyIHRocm91Z2ggc29ja2V0ICcvdmFyL3J1bi9teXNxbGQvbXlzcWxkLnNvY2snICgyKSBpbiA8Yj4vaG9tZS9hamF4bG9hZC93d3cvbGlicmFpcmllcy9jbGFzcy5teXNxbC5waHA8L2I+IG9uIGxpbmUgPGI+Njg8L2I+PGJyIC8+CjxiciAvPgo8Yj5XYXJuaW5nPC9iPjogIG15c3FsX3F1ZXJ5KCkgWzxhIGhyZWY9J2Z1bmN0aW9uLm15c3FsLXF1ZXJ5Jz5mdW5jdGlvbi5teXNxbC1xdWVyeTwvYT5dOiBBIGxpbmsgdG8gdGhlIHNlcnZlciBjb3VsZCBub3QgYmUgZXN0YWJsaXNoZWQgaW4gPGI+L2hvbWUvYWpheGxvYWQvd3d3L2xpYnJhaXJpZXMvY2xhc3MubXlzcWwucGhwPC9iPiBvbiBsaW5lIDxiPjY4PC9iPjxiciAvPgo8YnIgLz4KPGI+V2FybmluZzwvYj46ICBteXNxbF9xdWVyeSgpIFs8YSBocmVmPSdmdW5jdGlvbi5teXNxbC1xdWVyeSc+ZnVuY3Rpb24ubXlzcWwtcXVlcnk8L2E+XTogQ2FuJ3QgY29ubmVjdCB0byBsb2NhbCBNeVNRTCBzZXJ2ZXIgdGhyb3VnaCBzb2NrZXQgJy92YXIvcnVuL215c3FsZC9teXNxbGQuc29jaycgKDIpIGluIDxiPi9ob21lL2FqYXhsb2FkL3d3dy9saWJyYWlyaWVzL2NsYXNzLm15c3FsLnBocDwvYj4gb24gbGluZSA8Yj42ODwvYj48YnIgLz4KPGJyIC8+CjxiPldhcm5pbmc8L2I+OiAgbXlzcWxfcXVlcnkoKSBbPGEgaHJlZj0nZnVuY3Rpb24ubXlzcWwtcXVlcnknPmZ1bmN0aW9uLm15c3FsLXF1ZXJ5PC9hPl06IEEgbGluayB0byB0aGUgc2VydmVyIGNvdWxkIG5vdCBiZSBlc3RhYmxpc2hlZCBpbiA8Yj4vaG9tZS9hamF4bG9hZC93d3cvbGlicmFpcmllcy9jbGFzcy5teXNxbC5waHA8L2I+IG9uIGxpbmUgPGI+Njg8L2I+PGJyIC8+Cg==);
+			display: none;
+		}
+
+	</style>
+</head>
+<body>
+<div class="sidebar-body">
+
+	<!-- HOW TO -->
+	Just click on the following button to get the text highlighted per sentence length.<br>
+
+	<!-- BUTTON -->
+	<span id="to-highlight" class="button blue">Highlight!</span>
+
+	<!-- LOADER -->
+	<div class="loader"></div>
+
+	<!-- STATS -->
+	<div id="stats">
+		<h2 class="title">STATS</h2>
+
+		<!-- YELLOW -->
+		<div class="stat-container yellow">
+			<div class="colored-square"></div>
+			<div class="stat-text"><var class="num"></var> tiny sentences (<var class="percentage"></var>%)</div>
+		</div>
+
+		<!-- PINK -->
+		<div class="stat-container pink">
+			<div class="colored-square"></div>
+			<div class="stat-text"><var class="num"></var> short sentences (<var class="percentage"></var>%)</div>
+		</div>
+
+		<!-- RED -->
+		<div class="stat-container red">
+			<div class="colored-square"></div>
+			<div class="stat-text"><var class="num"></var> short-medium sentences (<var class="percentage"></var>%)</div>
+		</div>
+
+		<!-- GREEN -->
+		<div class="stat-container green">
+			<div class="colored-square"></div>
+			<div class="stat-text"><var class="num"></var> medium sentences (<var class="percentage"></var>%)</div>
+		</div>
+
+		<!-- CYAN -->
+		<div class="stat-container cyan">
+			<div class="colored-square"></div>
+			<div class="stat-text"><var class="num"></var> long sentences (<var class="percentage"></var>%)</div>
+		</div>
+
+		<!-- MESSAGES -->
+		<div class="informative">Press Ctrl+Z to remove the artificial highlights added by the add-on or <a id="to-clean" href="#">click here</a> to remove all the highlights from the text (even the ones you had manually added)</div>
+		<div class="ego">
+			Based on the quote by Gary Provost and created by <a target="_blank" href="http://ojoven.es">@ojoven</a>.<br>
+			Find the code <a href="https://github.com/ojoven/google-docs-highlight">on Github</a>
+		</div>
+	</div>
+
+</div>
+
+<script>
+	$(function() {
+
+		// Highlight function
+		$('#to-highlight').click(function() {
+
+			$('.loader').show();
+
+			// Call to the Code.gs function
+			google.script.run
+				// Success Callback
+				.withSuccessHandler(function(response) {
+
+					stats = JSON.parse(response); // Code.gs returns a string JSON, we convert it to an object
+
+					// Add number to stats
+					var total = 0;
+					Object.keys(stats).forEach(function(key) {
+
+						$('.' + key).find('.num').html(stats[key]);
+						total += stats[key]; // We use this first loop to calculate the total number of sentences
+
+					});
+
+					// Add percentage to stats
+					Object.keys(stats).forEach(function(key) {
+
+						var percentage = Math.round((stats[key] / total) * 100);
+						$('.' + key).find('.percentage').html(percentage);
+
+					});
+
+					// Show stats and hide the loader
+					$('#stats').show();
+					$('.loader').hide();
+
+				})
+
+				// Call the function
+				.runDocumentTextHighlighter();
+
+		});
+
+		// Clean highlights
+		$('#to-clean').click(function() {
+
+			// Show loader and hide the stats
+			$('#stats').hide();
+			$('.loader').show();
+			google.script.run
+				// Success Callback
+				.withSuccessHandler(function() {
+
+					// Hide the loader when finished
+					$('.loader').hide();
+				})
+
+				// Call the function
+				.runDocumentTextHighlightCleaner();
+
+			return false;
+		});
+
+	});
+
+</script>
+</body>
 </html>
