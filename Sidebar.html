@@ -10,11 +10,27 @@
 		/** BODY **/
 		.sidebar-body {
 			margin: 10px;
+			text-align: center;
 		}
 
 		/** BUTTON **/
 		.button {
 			margin: 10px 0;
+		}
+
+		/** THRESHOLD **/
+		#threshold .title {
+			font-size: 10px;
+			line-height: 10px;
+			text-align: center;
+			display: block;
+			width: 90%;
+			margin: 0 auto 5px;
+		}
+
+		#threshold {
+			text-align: center;
+			margin: 20px 0;
 		}
 
 		/** STATS **/
@@ -24,11 +40,19 @@
 
 		.stat-container {
 			margin: 10px 0;
+			text-align: left;
+			font-size: 12px;
 		}
 
 		/** NUMS **/
-		.stat-container var {
+		.stat-container var.num {
 			font-weight: bold;
+		}
+
+		.stat-container .length {
+			color: #999;
+			font-size: 10px;
+			letter-spacing: 1px;
 		}
 
 		/** SQUARES **/
@@ -54,6 +78,10 @@
 			margin: 10px 0;
 		}
 
+		.informative {
+			line-height: 12px;
+		}
+
 		.ego {
 			font-size: 10px;
 			line-height: 1;
@@ -62,6 +90,7 @@
 		.ego a {
 			color: #999;
 			font-weight: bold;
+			text-decoration: underline;
 		}
 
 		/** GIF LOADER **/
@@ -95,105 +124,143 @@
 		<!-- YELLOW -->
 		<div class="stat-container yellow">
 			<div class="colored-square"></div>
-			<div class="stat-text"><var class="num"></var> tiny sentences (<var class="percentage"></var>%)</div>
+			<div class="stat-text"><var class="num"></var> tiny <span class="length">(&lt;=<var class="length-0"></var> words)</span> sentences (<var class="percentage"></var>%)</div>
 		</div>
 
 		<!-- PINK -->
 		<div class="stat-container pink">
 			<div class="colored-square"></div>
-			<div class="stat-text"><var class="num"></var> short sentences (<var class="percentage"></var>%)</div>
+			<div class="stat-text"><var class="num"></var> short <span class="length">(&lt;=<var class="length-1"></var> words)</span> sentences (<var class="percentage"></var>%)</div>
 		</div>
 
 		<!-- RED -->
 		<div class="stat-container red">
 			<div class="colored-square"></div>
-			<div class="stat-text"><var class="num"></var> short-medium sentences (<var class="percentage"></var>%)</div>
+			<div class="stat-text"><var class="num"></var> short-medium <span class="length">(&lt;=<var class="length-2"></var> words)</span> sentences (<var class="percentage"></var>%)</div>
 		</div>
 
 		<!-- GREEN -->
 		<div class="stat-container green">
 			<div class="colored-square"></div>
-			<div class="stat-text"><var class="num"></var> medium sentences (<var class="percentage"></var>%)</div>
+			<div class="stat-text"><var class="num"></var> medium <span class="length">(&lt;=<var class="length-3"></var> words)</span> sentences (<var class="percentage"></var>%)</div>
 		</div>
 
 		<!-- CYAN -->
 		<div class="stat-container cyan">
 			<div class="colored-square"></div>
-			<div class="stat-text"><var class="num"></var> long sentences (<var class="percentage"></var>%)</div>
+			<div class="stat-text"><var class="num"></var> long <span class="length">(&gt;<var class="length-3"></var> words)</span> sentences (<var class="percentage"></var>%)</div>
+		</div>
+
+		<!-- THRESHOLD -->
+		<div id="threshold">
+			<span class="title">You can also update the threshold to make the sentence length highlighting more flexible</span>
+			<input id="threshold-input" type="range" min="1" max="11">
 		</div>
 
 		<!-- MESSAGES -->
 		<div class="informative">Press Ctrl+Z to remove the artificial highlights added by the add-on or <a id="to-clean" href="#">click here</a> to remove all the highlights from the text (even the ones you had manually added)</div>
 		<div class="ego">
-			Based on the quote by Gary Provost, created by <a target="_blank" href="http://ojoven.es">@ojoven</a>.<br>
-			Find the code <a href="https://github.com/ojoven/google-docs-highlight">on Github</a>
+			Based on the quote by Gary Provost, created by <a target="_blank" href="https://twitter.com/ojoven">@ojoven</a>.<br>
+			Find the code <a href="https://github.com/ojoven/google-docs-highlight">on Github</a>, please feel free to contribute!
 		</div>
 	</div>
 
 </div>
 
 <script>
+
+	/** FUNCTIONS **/
+	// Main: Highlight the text and show the stats
+	function highlightAndStats() {
+
+		var threshold = $('#threshold-input').val();
+
+		$('.loader').show();
+		$('#stats').hide();
+
+		// Call to the Code.gs function
+		google.script.run
+			// Success Callback
+			.withSuccessHandler(function(response) {
+
+				response = JSON.parse(response); // Code.gs returns a string JSON, we convert it to an object
+				var stats = response.stats;
+				var sentenceLengths = response.sentenceLengths;
+
+				// Add number to stats
+				var total = 0;
+				Object.keys(stats).forEach(function(key) {
+
+					$('.' + key).find('.num').html(stats[key]);
+					total += stats[key]; // We use this first loop to calculate the total number of sentences
+
+				});
+
+				// Add percentage to stats
+				Object.keys(stats).forEach(function(key) {
+
+					var percentage = Math.round((stats[key] / total) * 100);
+					$('.' + key).find('.percentage').html(percentage);
+
+				});
+
+				// Add length
+				sentenceLengths.forEach(function(key,index) {
+					$('.length-' + index).html(key);
+				});
+
+
+				// Show stats and hide the loader
+				$('#stats').show();
+				$('.loader').hide();
+
+			})
+
+			// Call the function
+			.runDocumentTextHighlighter(threshold);
+
+	}
+
+	// Clean the highlights
+	function cleanHighlight() {
+
+		// Show loader and hide the stats
+		$('#stats').hide();
+		$('.loader').show();
+		google.script.run
+			// Success Callback
+			.withSuccessHandler(function() {
+
+				// Hide the loader when finished
+				$('.loader').hide();
+			})
+
+			// Call the function
+			.runDocumentTextHighlightCleaner();
+
+	}
+
+	/** LOGIC **/
 	$(function() {
 
 		// Highlight function
 		$('#to-highlight').click(function() {
-
-			$('.loader').show();
-
-			// Call to the Code.gs function
-			google.script.run
-				// Success Callback
-				.withSuccessHandler(function(response) {
-
-					stats = JSON.parse(response); // Code.gs returns a string JSON, we convert it to an object
-
-					// Add number to stats
-					var total = 0;
-					Object.keys(stats).forEach(function(key) {
-
-						$('.' + key).find('.num').html(stats[key]);
-						total += stats[key]; // We use this first loop to calculate the total number of sentences
-
-					});
-
-					// Add percentage to stats
-					Object.keys(stats).forEach(function(key) {
-
-						var percentage = Math.round((stats[key] / total) * 100);
-						$('.' + key).find('.percentage').html(percentage);
-
-					});
-
-					// Show stats and hide the loader
-					$('#stats').show();
-					$('.loader').hide();
-
-				})
-
-				// Call the function
-				.runDocumentTextHighlighter();
-
-		});
-
-		// Clean highlights
-		$('#to-clean').click(function() {
-
-			// Show loader and hide the stats
-			$('#stats').hide();
-			$('.loader').show();
-			google.script.run
-				// Success Callback
-				.withSuccessHandler(function() {
-
-					// Hide the loader when finished
-					$('.loader').hide();
-				})
-
-				// Call the function
-				.runDocumentTextHighlightCleaner();
-
+			highlightAndStats();
 			return false;
 		});
+
+		$('#threshold').on('change', function() {
+			highlightAndStats();
+			return false;
+		});
+
+		// Clean highlight
+		$('#to-clean').click(function() {
+			cleanHighlight();
+			return false;
+		});
+
+
 
 	});
 
