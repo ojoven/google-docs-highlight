@@ -27,7 +27,8 @@ function runDocumentTextHighlighter() {
     // Vars
     var pText = paragraph.editAsText();
     var pString = pText.getText();
-    var sentencesArray = pString.split('.');
+    //var sentencesArray = pString.split('.');
+    var sentencesArray = pString.split(/[.:;?!\r\n/\\]+/);
     
     // Loop over the sentences
     sentencesArray.forEach(function(sentence) {
@@ -36,7 +37,7 @@ function runDocumentTextHighlighter() {
       
       // If not empty sentence
       if (sentence.trim()!="") {
-      
+        
         // Get the sentence's length
         var sentenceLength = sentence.trim().split(' ').length;
         if (sentenceLength <= 2) {
@@ -102,8 +103,6 @@ function increaseNumStats(stats, color) {
     stats[color]++; 
   }
   
-  Logger.log(stats[color]);
-  
   return stats;
 }
 
@@ -114,8 +113,14 @@ function highlightText(paragraph, textToHighlight, color) {
   var textLocation = {};
   var i;
 
-  textLocation = paragraph.findText(textToHighlight);
+  textLocation = paragraph.findText(escapeRegExp(textToHighlight));
   if (textLocation != null && textLocation.getStartOffset() != -1) {
     textLocation.getElement().setAttributes(textLocation.getStartOffset(),textLocation.getEndOffsetInclusive(), highlightStyle);
   }
+
+  //Logger.log(textLocation);
+}
+
+function escapeRegExp(str) {
+  return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
