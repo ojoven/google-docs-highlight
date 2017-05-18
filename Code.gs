@@ -28,7 +28,7 @@ function runDocumentTextHighlighter() {
     var pText = paragraph.editAsText();
     var pString = pText.getText();
     //var sentencesArray = pString.split('.');
-    var sentencesArray = pString.split(/[.:;?!\r\n/\\]+/);
+    var sentencesArray = pString.split(/[.:;?!\r\n]+/);
     
     // Loop over the sentences
     sentencesArray.forEach(function(sentence) {
@@ -57,7 +57,7 @@ function runDocumentTextHighlighter() {
           stats = increaseNumStats(stats, 'cyan');
         }
       
-        highlightText(paragraph, sentence, color);
+        highlightSentence(paragraph, sentence, color);
       }
       
     });
@@ -87,7 +87,7 @@ function runDocumentTextHighlightCleaner() {
       
       // If not empty sentence
       if (sentence.trim()!="") {
-        highlightText(paragraph, sentence, null);
+        highlightSentence(paragraph, sentence, null);
       }
       
     });
@@ -106,19 +106,47 @@ function increaseNumStats(stats, color) {
   return stats;
 }
 
-function highlightText(paragraph, textToHighlight, color) {
+function highlightSentence(paragraph, sentence, color) {
 
   var highlightStyle = {};
   highlightStyle[DocumentApp.Attribute.BACKGROUND_COLOR] = color;
   var textLocation = {};
   var i;
+  var paragraphText = paragraph.getText();
 
-  textLocation = paragraph.findText(escapeRegExp(textToHighlight));
+  textLocation = paragraph.findText(escapeRegExp(sentence));
   if (textLocation != null && textLocation.getStartOffset() != -1) {
-    textLocation.getElement().setAttributes(textLocation.getStartOffset(),textLocation.getEndOffsetInclusive(), highlightStyle);
+    
+    var indexStart = getHighlightIndexStart(textLocation, paragraphText);
+    var indexEnd = getHighlightIndexEnd(textLocation, paragraphText);
+    
+    textLocation.getElement().setAttributes(indexStart,indexEnd, highlightStyle);
   }
 
-  //Logger.log(textLocation);
+  //Logger.log(paragraphText);
+}
+
+function getHighlightIndexStart(textLocation, paragraphText) {
+
+  var indexStart = textLocation.getStartOffset();
+  var charStart = paragraphText[indexStart];
+  if (charStart == ' ') {
+    indexStart++;
+  }
+  
+  return indexStart;
+}
+
+function getHighlightIndexEnd(textLocation, paragraphText) {
+
+  var indexEnd = textLocation.getEndOffsetInclusive();
+  var charEndNext = paragraphText[indexEnd + 1];
+  var arraySplitters = ['.', ':' ,';', '?', '!'];
+  if (arraySplitters.indexOf(charEndNext) !== -1) {
+   indexEnd++; 
+  }
+  
+  return indexEnd;
 }
 
 function escapeRegExp(str) {
