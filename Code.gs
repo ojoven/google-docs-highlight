@@ -1,3 +1,6 @@
+// Global var
+var arraySplitters = ['.', ':' ,';', '?', '!'];
+
 // On Open, creates a menu option and runs the show sidebar function
 function onOpen(e) {
   DocumentApp.getUi().createAddonMenu()
@@ -133,14 +136,30 @@ function highlightSentence(paragraph, sentence, color) {
         var indexStart = getHighlightIndexStart(textLocation, paragraphText);
         var indexEnd = getHighlightIndexEnd(textLocation, paragraphText);
 
-        // Change the background color to yellow
-        foundText.setAttributes(indexStart,indexEnd, highlightStyle);
+        // Should we highlight the element found?
+        if (shouldWeHighlight(paragraphText, indexEnd)) {
+
+          // Change the background color to the belonging colour
+          foundText.setAttributes(indexStart,indexEnd, highlightStyle);
+        }
 
         // Find the next match
         textLocation = paragraph.findText(escapeRegExp(sentence), textLocation);
     }
 
   //Logger.log(paragraphText);
+}
+
+function shouldWeHighlight(paragraphText, indexEnd) {
+
+  // We'll only highlight the found text if it ends in one of the splitting characters (.!?) or it's an end of line
+  var charEnd = paragraphText[indexEnd];
+  var charEndNext = paragraphText[indexEnd + 1];
+  if (arraySplitters.indexOf(charEnd) !== -1 || charEndNext === undefined) {
+    return true;
+  }
+
+  return false;
 }
 
 function getHighlightIndexStart(textLocation, paragraphText) {
@@ -158,7 +177,6 @@ function getHighlightIndexEnd(textLocation, paragraphText) {
 
   var indexEnd = textLocation.getEndOffsetInclusive();
   var charEndNext = paragraphText[indexEnd + 1];
-  var arraySplitters = ['.', ':' ,';', '?', '!'];
   if (arraySplitters.indexOf(charEndNext) !== -1) {
    indexEnd++; 
   }
@@ -171,11 +189,11 @@ function getSentencesLengthBasedOnThreshold(threshold) {
   var arrayThresholdLengths = [];
   arrayThresholdLengths[1] = [1,2,3,4];
   arrayThresholdLengths[2] = [1,2,4,6];
-  arrayThresholdLengths[3] = [2,3,5,7];
-  arrayThresholdLengths[4] = [2,4,5,9];
-  arrayThresholdLengths[5] = [2,4,6,10];
-  arrayThresholdLengths[6] = [3,5,8,12];
-  arrayThresholdLengths[7] = [4,7,10,15];
+  arrayThresholdLengths[3] = [2,3,4,7];
+  arrayThresholdLengths[4] = [2,3,5,8];
+  arrayThresholdLengths[5] = [2,3,5,9];
+  arrayThresholdLengths[6] = [2,4,6,10];
+  arrayThresholdLengths[7] = [3,7,10,14];
   arrayThresholdLengths[8] = [5,9,14,18];
   arrayThresholdLengths[9] = [7,11,16,20];
   arrayThresholdLengths[10] = [10,14,18,24];
