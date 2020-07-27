@@ -17,7 +17,7 @@ This script is not currently available in the google app store. To install manua
 - Replace the HTML code with the Sidebar.html [code from this repository](Sidebar.html)
 - Save all files and name the new script "HighlightTheMusic"
 - Refresh your Google Doc
-- You'll find a new menu item under Addons -> HighlightTheMusic which you can run to highlight your sentances.
+- You'll find a new menu item under Addons -> HighlightTheMusic which you can run to highlight your sentences.
 
  
 Please feel to contribute.
